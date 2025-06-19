@@ -1,0 +1,17 @@
+{
+  "name": "shards-backend",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron .",
+    "dev": "ng serve"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "backend for SHARDS frontend",
+  "devDependencies": {
+    "electron": "^34.0.1"
+  }
+}
