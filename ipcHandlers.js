@@ -5,7 +5,6 @@ const fs = require('fs');
 const path = require('path');
 
 ipcMain.handle('dialog:openFiles', async () => {
-    console.log('dialog.showOpenDialog()');
     try {
         const result = await dialog.showOpenDialog(getMainWindow(), {
             properties: ['openFile', 'multiSelections'],
@@ -36,6 +35,7 @@ ipcMain.handle('files:renameFiles', async (event, filesToRename) => {
             console.log(oldPath);
             console.log(newPath);
             await fs.promises.rename(oldPath, newPath);
+            file.name = file.changedName;
         } catch (error) {
             errors.push({ file: file.name, message: error.message });
         }
@@ -44,5 +44,5 @@ ipcMain.handle('files:renameFiles', async (event, filesToRename) => {
     if (errors.length > 0) {
         return { success: false, errors };
     }
-    return { success: true };
+    return { success: true, renamedFiles: filesToRename };
 });
