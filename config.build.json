@@ -1,0 +1,20 @@
+{
+  "frontendProject": "../shards",
+  "frontendOutput": "dist/shards",
+  "frontendPath": "dist/browser/index.html",
+  "backendOutput": "dist",
+  "angularBuildCommand": "npm run build -- --configuration=production --base-href=./",
+  "electronBuildCommand": "electron-builder",
+  "electronConfig": {
+    "window": {
+      "width": 1000,
+      "height": 800
+    },
+    "devTools": true,
+    "webPreferences": {
+      "contextIsolation": true,
+      "nodeIntegration": false,
+      "webSecurity": true
+    }
+  }
+}

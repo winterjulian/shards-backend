@@ -5,7 +5,7 @@ const fs = require('fs');
 let mainWindow;
 const isDev = !app.isPackaged;
 
-const configPath = path.join(app.getAppPath(), 'config.json');
+const configPath = path.join(app.getAppPath(), 'config.build.json');
 let frontendPath;
 
 try {
@@ -43,8 +43,6 @@ function createMainWindow() {
         Menu.setApplicationMenu(null);
         const indexPath = path.join(__dirname, frontendPath);
         mainWindow.loadFile(indexPath);
-        // DevTools nur für Debug-Build aktivieren:
-        // mainWindow.webContents.openDevTools();
     }
 }
 

@@ -9,7 +9,8 @@
     "build-frontend": "cd ../shards && ng build --configuration=production --base-href=./",
     "copy-frontend": "powershell -Command \"Remove-Item -Recurse -Force ./dist; Copy-Item ../shards/dist/shards ./dist -Recurse\"",
     "electron:dev": "electron .",
-    "electron:build": "npm run build-frontend && npm run copy-frontend && electron-builder"
+    "electron:build": "npm run build-frontend && npm run copy-frontend && electron-builder",
+    "electron:prod": "node build.mjs"
   },
   "devDependencies": {
     "electron": "^34.0.1",
@@ -25,7 +26,7 @@
       "dist/**",
       "*.js",
       "package.json",
-      "config.json"
+      "config.build.json"
     ],
     "win": {
       "target": "nsis",
