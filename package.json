@@ -2,16 +2,39 @@
   "name": "shards-backend",
   "version": "1.0.0",
   "main": "main.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron .",
-    "dev": "ng serve"
-  },
-  "keywords": [],
+  "description": "Backend for SHARDS frontend",
   "author": "",
   "license": "ISC",
-  "description": "backend for SHARDS frontend",
+  "scripts": {
+    "build-frontend": "cd ../shards && ng build --configuration=production --base-href=./",
+    "copy-frontend": "powershell -Command \"Remove-Item -Recurse -Force ./dist; Copy-Item ../shards/dist/shards ./dist -Recurse\"",
+    "electron:dev": "electron .",
+    "electron:build": "npm run build-frontend && npm run copy-frontend && electron-builder"
+  },
   "devDependencies": {
-    "electron": "^34.0.1"
+    "electron": "^34.0.1",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.shards.app",
+    "productName": "Shards",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "dist/**",
+      "*.js",
+      "package.json",
+      "config.json"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    }
   }
 }

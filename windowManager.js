@@ -1,21 +1,51 @@
-const { BrowserWindow } = require('electron');
+const { BrowserWindow, app, Menu } = require('electron');
 const path = require('path');
+const fs = require('fs');
 
 let mainWindow;
+const isDev = !app.isPackaged;
+
+const configPath = path.join(app.getAppPath(), 'config.json');
+let frontendPath;
+
+try {
+    const rawData = fs.readFileSync(configPath, 'utf-8');
+    const config = JSON.parse(rawData);
+
+    if (config.frontendPath) {
+        frontendPath = config.frontendPath;
+    } else {
+        console.error(`⚠️ frontendPath fehlt in ${configPath}`);
+        process.exit(1);
+    }
+} catch (e) {
+    console.error(`❌ Fehler beim Lesen der Config (${configPath}):`, e.message);
+    process.exit(1);
+}
 
 function createMainWindow() {
     mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
+        width: 1000,
+        height: 800,
         webPreferences: {
-            preload: path.join(__dirname, 'preload.js'),
-            nodeIntegration: true,
-            contextIsolation: true
-        }
+            preload: path.join(app.getAppPath(), 'preload.js'),
+            nodeIntegration: isDev,
+            contextIsolation: true,
+            webSecurity: !isDev
+        },
     });
 
-    mainWindow.loadURL('http://localhost:4200');
-    mainWindow.webContents.openDevTools();
+
+    if (isDev) {
+        mainWindow.loadURL('http://localhost:4200');
+        mainWindow.webContents.openDevTools();
+    } else {
+        Menu.setApplicationMenu(null);
+        const indexPath = path.join(__dirname, frontendPath);
+        mainWindow.loadFile(indexPath);
+        // DevTools nur für Debug-Build aktivieren:
+        // mainWindow.webContents.openDevTools();
+    }
 }
 
 function getMainWindow() {
@@ -24,5 +54,5 @@ function getMainWindow() {
 
 module.exports = {
     createMainWindow,
-    getMainWindow
+    getMainWindow,
 };
