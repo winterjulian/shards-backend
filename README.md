@@ -20,7 +20,7 @@ The electron's main process (backend) for "Shards", an electron render process (
 ## Q&A
 
 1. What is this?
-    - This is a part of an Electron application, mainly the so called "main process". It functions as a backend for a corresponding Electron render process (frontend).
+    - This is a part of an Electron application, mainly the so-called "main process". It functions as a backend for a corresponding Electron render process (frontend).
 2. What could go wrong when building this?
     - For prod? A lot of things. Therefore, the build.mjs script is here to guide you. It tries to check every single step and gives you feedback if something is not working as expected. Just run `npm run electron:prod`.
 3. Is there a database involved?
