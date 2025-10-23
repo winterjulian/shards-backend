@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "main.js",
   "description": "Backend for SHARDS frontend",
-  "author": "",
+  "author": "Julian Winter",
+  "type": "module",
   "license": "ISC",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -36,5 +37,8 @@
       "perMachine": false,
       "allowToChangeInstallationDirectory": true
     }
+  },
+  "dependencies": {
+    "electron-store": "^11.0.2"
   }
 }

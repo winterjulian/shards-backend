@@ -1,6 +1,6 @@
-const path = require('path');
+import path from 'path';
 
-function extendFileInformation(filePath, index) {
+export function extendFileInformation(filePath, index) {
     const fileName = path.basename(filePath);
     const purePath = path.dirname(filePath);
     const extension = path.extname(fileName);
@@ -18,10 +18,6 @@ function extendFileInformation(filePath, index) {
         length: fileName.length,
         extension,
         changedName: name,
-        changeApproved: false
+        changeApproved: false,
     };
 }
-
-module.exports = {
-    extendFileInformation
-};

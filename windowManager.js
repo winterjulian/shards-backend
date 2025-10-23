@@ -1,6 +1,11 @@
-const { BrowserWindow, app, Menu } = require('electron');
-const path = require('path');
-const fs = require('fs');
+import { BrowserWindow, app, Menu } from 'electron';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+// ESM-Variablen für Pfad-Auflösung
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 let mainWindow;
 const isDev = !app.isPackaged;
@@ -23,18 +28,17 @@ try {
     process.exit(1);
 }
 
-function createMainWindow() {
+export function createMainWindow() {
     mainWindow = new BrowserWindow({
         width: 1000,
         height: 800,
         webPreferences: {
-            preload: path.join(app.getAppPath(), 'preload.js'),
-            nodeIntegration: isDev,
+            preload: path.join(__dirname, 'preload.js'), // ESM-kompatibel
+            nodeIntegration: isDev, // nur für Dev
             contextIsolation: true,
-            webSecurity: !isDev
+            webSecurity: !isDev,
         },
     });
-
 
     if (isDev) {
         mainWindow.loadURL('http://localhost:4200');
@@ -46,11 +50,6 @@ function createMainWindow() {
     }
 }
 
-function getMainWindow() {
+export function getMainWindow() {
     return mainWindow;
 }
-
-module.exports = {
-    createMainWindow,
-    getMainWindow,
-};

@@ -1,8 +1,9 @@
-const { ipcMain, dialog } = require('electron');
-const { getMainWindow } = require('./windowManager');
-const { extendFileInformation } = require('./fileUtils');
-const fs = require('fs');
-const path = require('path');
+import { registerStoreHandlers } from './storeService.js';
+import { ipcMain, dialog } from 'electron';
+import { getMainWindow } from './windowManager.js';
+import { extendFileInformation } from './fileUtils.js';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 ipcMain.handle('dialog:openFiles', async () => {
     try {
@@ -11,9 +12,7 @@ ipcMain.handle('dialog:openFiles', async () => {
             filters: [{ name: 'Alle Dateien', extensions: ['*'] }],
         });
 
-        if (result.canceled) {
-            return [];
-        }
+        if (result.canceled) return [];
 
         return result.filePaths.map((filePath, index) =>
             extendFileInformation(filePath, index)
@@ -24,16 +23,44 @@ ipcMain.handle('dialog:openFiles', async () => {
     }
 });
 
+ipcMain.handle('dialog:getFilesFromDirectory', async (event, directoryPath) => {
+    console.log(directoryPath);
+    try {
+        const stats = await fs.stat(directoryPath);
+        if (!stats.isDirectory()) {
+            throw new Error('Der angegebene Pfad ist kein Ordner');
+        }
+
+        const files = await fs.readdir(directoryPath);
+
+        const fileDetails = [];
+        let index = 0;
+
+        for (const file of files) {
+            const fullPath = path.join(directoryPath, file);
+            const fileStat = await fs.stat(fullPath);
+
+            if (fileStat.isFile()) {
+                fileDetails.push(extendFileInformation(fullPath, index));
+                index++;
+            }
+        }
+
+        return fileDetails;
+
+    } catch (error) {
+        console.error('Fehler beim Laden der Files:', error);
+        throw new Error(`Fehler beim Laden der Files aus dem Ordner: ${error.message}`);
+    }
+});
+
 ipcMain.handle('files:renameFiles', async (event, filesToRename) => {
     const errors = [];
 
     for (const file of filesToRename) {
-        console.log(file);
         try {
             const oldPath = path.join(file.path, file.name + file.extension);
             const newPath = path.join(file.path, file.changedName + file.extension);
-            console.log(oldPath);
-            console.log(newPath);
             await fs.promises.rename(oldPath, newPath);
             file.name = file.changedName;
         } catch (error) {
@@ -45,4 +72,17 @@ ipcMain.handle('files:renameFiles', async (event, filesToRename) => {
         return { success: false, errors };
     }
     return { success: true, renamedFiles: filesToRename };
+});
+
+ipcMain.handle('dialog:openFolder', async () => {
+    const mainWindow = getMainWindow();
+    if (!mainWindow) return null;
+
+    const result = await dialog.showOpenDialog(mainWindow, {
+        properties: ['openDirectory'],
+    });
+
+    if (result.canceled || result.filePaths.length === 0) return null;
+
+    return result.filePaths[0];
 });
