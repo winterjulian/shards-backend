@@ -5,9 +5,11 @@ import { extendFileInformation } from './fileUtils.js';
 import { promises as fs } from 'fs';
 import path from 'path';
 
-ipcMain.handle('dialog:openFiles', async () => {
+ipcMain.handle('dialog:openFiles', async (event, path) => {
+    console.log(path);
     try {
         const result = await dialog.showOpenDialog(getMainWindow(), {
+            defaultPath: path || undefined,
             properties: ['openFile', 'multiSelections'],
             filters: [{ name: 'Alle Dateien', extensions: ['*'] }],
         });

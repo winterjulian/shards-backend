@@ -2,7 +2,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 // Exponiere eine API für den Renderer-Prozess
 contextBridge.exposeInMainWorld('electron', {
-  openFiles: () => ipcRenderer.invoke('dialog:openFiles'),
+  openFiles: (path) => ipcRenderer.invoke('dialog:openFiles', path),
   getFilesFromDirectory: (directoryPath) => ipcRenderer.invoke('dialog:getFilesFromDirectory', directoryPath),
   renameFiles: (filesToRename) => ipcRenderer.invoke('files:renameFiles', filesToRename),
   getFavoriteDirectories: () => ipcRenderer.invoke('favorites:getDirectories'),
