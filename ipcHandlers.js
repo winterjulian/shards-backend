@@ -1,4 +1,3 @@
-import { registerStoreHandlers } from './storeService.js';
 import { ipcMain, dialog } from 'electron';
 import { getMainWindow } from './windowManager.js';
 import { extendFileInformation } from './fileUtils.js';
