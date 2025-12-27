@@ -1,4 +1,5 @@
 import path from 'path';
+import { randomUUID } from 'crypto';
 
 export function extendFileInformation(filePath, index) {
     const fileName = path.basename(filePath);
@@ -8,6 +9,7 @@ export function extendFileInformation(filePath, index) {
 
     return {
         index,
+        id: randomUUID(),
         name,
         displayName: name,
         groups: [],
