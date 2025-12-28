@@ -56,23 +56,46 @@ ipcMain.handle('dialog:getFilesFromDirectory', async (event, directoryPath) => {
 });
 
 ipcMain.handle('files:renameFiles', async (event, filesToRename) => {
-    const errors = [];
+    const successful = [];
+    const erroneous = [];
 
     for (const file of filesToRename) {
+        const oldPath = path.join(file.path, file.name + file.extension);
+        const newPath = path.join(file.path, file.changedName + file.extension);
+
         try {
-            const oldPath = path.join(file.path, file.name + file.extension);
-            const newPath = path.join(file.path, file.changedName + file.extension);
-            await fs.promises.rename(oldPath, newPath);
+            // Prüfen, ob die Zieldatei bereits existiert
+            const exists = await fs.access(newPath)
+                .then(() => true)
+                .catch(() => false);
+
+            if (exists) {
+                erroneous.push({
+                    id: file.id,
+                    externalErrorMessage: 'Datei existiert bereits',
+                });
+                continue; // nächstes File
+            }
+
+            // Tatsächliches Umbenennen
+            await fs.rename(oldPath, newPath);
+
+            // Update File-Objekt nach erfolgreichem Rename
             file.name = file.changedName;
+            successful.push(file.id);
+
         } catch (error) {
-            errors.push({ file: file.name, message: error.message });
+            console.log(error);
+            erroneous.push({
+                id: file.id,
+                message: 'Fehler beim Umbenennen',
+                externalError: true,
+                osErrorMessage: error.message
+            });
         }
     }
 
-    if (errors.length > 0) {
-        return { success: false, errors };
-    }
-    return { success: true, renamedFiles: filesToRename };
+    return { successful, erroneous };
 });
 
 ipcMain.handle('dialog:openFolder', async () => {

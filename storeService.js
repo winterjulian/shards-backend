@@ -52,7 +52,7 @@ export function registerStoreHandlers() {
 
         } catch (error) {
             return {
-                message: 'Fehler beim Hinzufügen des Ordners',
+                message: 'Fehler beim Hinzufügen des Favoriten',
                 isError: true,
                 errorMessage: error.message,
                 status: 500
