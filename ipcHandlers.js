@@ -64,21 +64,31 @@ ipcMain.handle('files:renameFiles', async (event, filesToRename) => {
         const newPath = path.join(file.path, file.changedName + file.extension);
 
         try {
-            // Prüfen, ob die Zieldatei bereits existiert
-            const exists = await fs.access(newPath)
-                .then(() => true)
-                .catch(() => false);
+            const onlyCaseChange = oldPath.toLowerCase() === newPath.toLowerCase() && oldPath !== newPath;
 
-            if (exists) {
-                erroneous.push({
-                    id: file.id,
-                    externalErrorMessage: 'Datei existiert bereits',
-                });
-                continue; // nächstes File
+            // Existenzcheck nur, wenn nicht Case-Only
+            if (!onlyCaseChange) {
+                const exists = await fs.access(newPath)
+                    .then(() => true)
+                    .catch(() => false);
+
+                if (exists) {
+                    erroneous.push({
+                        id: file.id,
+                        externalErrorMessage: 'Datei existiert bereits'
+                    });
+                    continue; // nächstes File
+                }
             }
 
-            // Tatsächliches Umbenennen
-            await fs.rename(oldPath, newPath);
+            // Windows Case-Only Workaround
+            if (onlyCaseChange) {
+                const tempPath = newPath + '__temp__';
+                await fs.rename(oldPath, tempPath);
+                await fs.rename(tempPath, newPath);
+            } else {
+                await fs.rename(oldPath, newPath);
+            }
 
             // Update File-Objekt nach erfolgreichem Rename
             file.name = file.changedName;
