@@ -29,7 +29,7 @@ ipcMain.handle('dialog:getFilesFromDirectory', async (event, directoryPath) => {
     try {
         const stats = await fs.stat(directoryPath);
         if (!stats.isDirectory()) {
-            throw new Error('Der angegebene Pfad ist kein Ordner');
+            throw new Error('Given path is no directory');
         }
 
         const files = await fs.readdir(directoryPath);
@@ -66,7 +66,6 @@ ipcMain.handle('files:renameFiles', async (event, filesToRename) => {
         try {
             const onlyCaseChange = oldPath.toLowerCase() === newPath.toLowerCase() && oldPath !== newPath;
 
-            // Existenzcheck nur, wenn nicht Case-Only
             if (!onlyCaseChange) {
                 const exists = await fs.access(newPath)
                     .then(() => true)
@@ -75,13 +74,12 @@ ipcMain.handle('files:renameFiles', async (event, filesToRename) => {
                 if (exists) {
                     erroneous.push({
                         id: file.id,
-                        externalErrorMessage: 'Datei existiert bereits'
+                        externalErrorMessage: 'File already exists'
                     });
-                    continue; // nächstes File
+                    continue;
                 }
             }
 
-            // Windows Case-Only Workaround
             if (onlyCaseChange) {
                 const tempPath = newPath + '__temp__';
                 await fs.rename(oldPath, tempPath);
@@ -90,7 +88,6 @@ ipcMain.handle('files:renameFiles', async (event, filesToRename) => {
                 await fs.rename(oldPath, newPath);
             }
 
-            // Update File-Objekt nach erfolgreichem Rename
             file.name = file.changedName;
             successful.push(file.id);
 
@@ -98,9 +95,7 @@ ipcMain.handle('files:renameFiles', async (event, filesToRename) => {
             console.log(error);
             erroneous.push({
                 id: file.id,
-                message: 'Fehler beim Umbenennen',
-                externalError: true,
-                osErrorMessage: error.message
+                externalErrorMessage: error.message
             });
         }
     }
