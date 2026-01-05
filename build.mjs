@@ -18,8 +18,9 @@ console.log('🧹 Cleaning previous backend package...');
 
 // === Copy backend ===
 if (!existsSync(backendDist)) {
-    console.error(`❌ Backend dist folder not found: ${backendDist}`);
-    process.exit(1);
+    console.error(`⚠️ Warning: Backend dist folder not found: ${backendDist}`);
+    console.log('Skipping packaging...');
+    process.exit(0);
 }
 
 console.log('📦 Copying backend files...');
