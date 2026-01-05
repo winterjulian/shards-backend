@@ -1,56 +1,37 @@
-import { exec } from 'child_process';
-import { rmSync, cpSync, existsSync, readFileSync } from 'fs';
+import { rmSync, cpSync, existsSync } from 'fs';
 import path from 'path';
+import { exec } from 'child_process';
 import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 
-// Load build config
-const configPath = path.resolve('./config.build.json');
-let config = {};
+// === Define paths ===
+const backendDist = path.resolve('./dist');       // Output deines Backend-Builds
+const packageDir = path.resolve('./release-backend');  // Zielpaket
+const packageZip = path.resolve('./backend.zip');      // optional ZIP
 
-try {
-    const rawData = readFileSync(configPath, 'utf-8');
-    config = JSON.parse(rawData);
-    console.log('🛠️Loaded build config.');
-} catch (e) {
-    console.error(`❌ Failed to read config (${configPath}):`, e.message);
+// === Cleanup of older builds ===
+rmSync(packageDir, { recursive: true, force: true });
+rmSync(packageZip, { force: true });
+
+console.log('🧹 Cleaning previous backend package...');
+
+// === Copy backend ===
+if (!existsSync(backendDist)) {
+    console.error(`❌ Backend dist folder not found: ${backendDist}`);
     process.exit(1);
 }
 
-// Resolve absolute paths
-const paths = {
-    frontendProject: path.resolve(config.frontendProject),
-    frontendDist: path.resolve(config.frontendProject, config.frontendOutput),
-    backendDist: path.resolve(config.backendOutput)
-};
+console.log('📦 Copying backend files...');
+cpSync(backendDist, packageDir, { recursive: true });
 
-async function run() {
-    try {
-        console.log('🚀 Starting Angular build...');
-
-        await execAsync(config.angularBuildCommand, { cwd: paths.frontendProject });
-
-        console.log('✅  Angular build finished.');
-
-        if (!existsSync(paths.frontendDist)) {
-            throw new Error(`❌ Frontend build not found at ${paths.frontendDist}`);
-        }
-
-        console.log('🧹 Removing previous frontend build in backend...');
-        rmSync(paths.backendDist, { recursive: true, force: true });
-
-        console.log('📦 Copying frontend to backend...');
-        cpSync(paths.frontendDist, paths.backendDist, { recursive: true });
-
-        console.log('⚙️ Running Electron build...');
-        await execAsync(config.electronBuildCommand);
-
-        console.log('🎉 Build completed successfully!');
-    } catch (err) {
-        console.error('❌ Build failed:', err.message);
+// === Optionally: Create zip ===
+console.log('📦 Creating backend.zip...');
+execAsync(`zip -r ${packageZip} ${packageDir}`)
+    .then(() => {
+        console.log('✅ Backend packaged successfully!');
+    })
+    .catch(err => {
+        console.error('❌ Failed to zip backend:', err.message);
         process.exit(1);
-    }
-}
-
-run();
+    });
