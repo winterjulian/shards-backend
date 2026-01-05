@@ -22,12 +22,12 @@ jobs:
         run: npm ci
 
       - name: Build backend
-        run: npm run build
-        # z.B. tsc / esbuild / whatever du nutzt
+        run: node build.mjs   # nur das Backend packen, kein Electron
 
       - name: Package backend
         run: |
           mkdir backend
+          # build.mjs erzeugt evtl. schon alles in dist/, hier ggf. anpassen
           cp -r dist package.json node_modules backend/
           zip -r backend.zip backend
 
