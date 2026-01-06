@@ -2,7 +2,10 @@
   "frontendProject": "../shards",
   "frontendOutput": "dist/shards",
   "frontendPath": "dist/browser/index.html",
+
+  "backendProject": ".",
   "backendOutput": "dist",
+
   "angularBuildCommand": "npm run build -- --configuration=production --base-href=./",
   "electronBuildCommand": "electron-builder",
   "electronConfig": {

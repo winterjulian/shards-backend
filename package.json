@@ -11,7 +11,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
     "electron:dev": "electron .",
-    "electron:prod": "node electron-build.mjs"
+    "electron:prod": "node build.mjs && node electron-build.mjs"
   },
   "devDependencies": {
     "electron": "^34.0.1",

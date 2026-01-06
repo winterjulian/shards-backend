@@ -3,35 +3,42 @@ name: Release Shards Backend
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*'   # Triggert bei Tags wie v1.0.0
 
 jobs:
   build-backend:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Repository auschecken
       - name: Checkout
         uses: actions/checkout@v4
 
+      # 2️⃣ Node.js Setup
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
+      # 3️⃣ Dependencies installieren
       - name: Install dependencies
         run: npm ci
 
+      # 4️⃣ Backend-only Build
       - name: Build backend
-        run: node build.mjs   # nur das Backend packen, kein Electron
+        run: node build.mjs --backend-only
 
+      # 5️⃣ Backend packen
       - name: Package backend
         run: |
           mkdir backend
-          # build.mjs erzeugt evtl. schon alles in dist/, hier ggf. anpassen
-          cp -r dist package.json node_modules backend/
+          cp -r dist/* package.json node_modules backend/
           zip -r backend.zip backend
 
+      # 6️⃣ GitHub Release erstellen und Zip hochladen
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: backend.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
