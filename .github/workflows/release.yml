@@ -40,4 +40,4 @@ jobs:
         with:
           files: backend.zip
         env:
-          GITHUB_TOKEN: ${{ secrets.FIRST_RELEASE }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
