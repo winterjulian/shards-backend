@@ -1,6 +1,5 @@
 import { exec } from 'child_process';
-import { existsSync, readFileSync } from 'fs';
-import { mkdirSync, cpSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, cpSync } from 'fs';
 import path from 'path';
 import { promisify } from 'util';
 
@@ -39,6 +38,28 @@ async function runStep(label, command, cwd) {
     console.log(`✅ ${label} finished`);
 }
 
+function copyBackendPlainJS(srcRoot, destRoot) {
+    if (!existsSync(destRoot)) mkdirSync(destRoot, { recursive: true });
+
+    const entries = readdirSync(srcRoot);
+
+    for (const entry of entries) {
+        if (entry === 'node_modules' || entry === 'dist') continue;
+
+        const srcPath = path.join(srcRoot, entry);
+        const destPath = path.join(destRoot, entry);
+        const stat = statSync(srcPath);
+
+        if (stat.isDirectory()) {
+            cpSync(srcPath, destPath, { recursive: true });
+        } else {
+            cpSync(srcPath, destPath);
+        }
+    }
+
+    console.log(`ℹ️  Backend plain JS copied to ${destRoot}`);
+}
+
 // --------------------------------------------------
 // Build pipeline
 // --------------------------------------------------
@@ -60,28 +81,17 @@ async function run() {
         }
 
         // -----------------------------
-        // Build Backend (optional)
+        // Build Backend
         // -----------------------------
         if (config.backendBuildCommand) {
             await runStep('Building Backend', config.backendBuildCommand, paths.backendRoot);
         } else {
-            console.log('ℹ️  No backend build step configured → skipping');
-
-            // Für plain JS: sicherstellen, dass paths.backendDist existiert
-            if (!existsSync(paths.backendDist)) {
-                console.log(`ℹ️  Creating backend dist folder at ${paths.backendDist}`);
-                mkdirSync(paths.backendDist, { recursive: true });
-
-                // Backend-Dateien kopieren (ohne node_modules, dist)
-                cpSync(paths.backendRoot, paths.backendDist, {
-                    recursive: true,
-                    filter: (src) => !src.includes('node_modules') && !src.includes('dist')
-                });
-            }
+            console.log('ℹ️  No backend build step configured → assuming plain JS');
+            copyBackendPlainJS(paths.backendRoot, paths.backendDist);
         }
 
         // -----------------------------
-        // Final existence check
+        // Final existence checks
         // -----------------------------
         if (!existsSync(paths.backendDist)) {
             throw new Error(`Backend dist not found: ${paths.backendDist}`);
