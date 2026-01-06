@@ -31,9 +31,8 @@ jobs:
       # 5️⃣ Backend packen
       - name: Package backend
         run: |
-          mkdir backend
-          cp -r dist/* package.json node_modules backend/
-          zip -r backend.zip backend
+          cd dist
+          zip -r ../backend.zip .
 
       # 6️⃣ GitHub Release erstellen und Zip hochladen
       - name: Create GitHub Release
