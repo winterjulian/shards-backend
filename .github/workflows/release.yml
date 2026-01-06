@@ -34,10 +34,10 @@ jobs:
           cd dist
           zip -r ../backend.zip .
 
-      # 6️⃣ GitHub Release erstellen und Zip hochladen
+      # 6️⃣ Create GitHub Release using your PAT
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: backend.zip
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
